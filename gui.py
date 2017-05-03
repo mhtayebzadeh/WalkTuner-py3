@@ -9,6 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog
 from collections import OrderedDict
+import serial
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -276,8 +277,17 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         #MyCode Start
+        self.flag = False
+        try:
+            self.ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
+            self.flag = True
+        except:
+            print("Port not found")
+            self.flag = False
         self.actionSave.triggered.connect(self.saveFile)
         self.actionOpen.triggered.connect(self.openFile)
+        self.stopBtn.clicked.connect(self.stopRobot)
+        self.startBtn.clicked.connect(self.startRobot)
         #MyCode Finish
 
         self.tabWidget.setCurrentIndex(0)
@@ -354,6 +364,20 @@ class Ui_MainWindow(object):
             seq[cnt].setValue(float(line[1]))
             cnt += 1
         myFile.close()
+
+    def stopRobot(self):
+        if(self.flag):
+            myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0])
+            self.ser.write(myArr)
+        else:
+            print("Not Connected to Robot")
+
+    def startRobot(self):
+        if(self.flag):
+            myArr = bytearray([254, 100, 0, 0, 100, 0, 0, 0, 0])
+            self.ser.write(myArr)
+        else:
+            print ("Not connected to Robot")
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
