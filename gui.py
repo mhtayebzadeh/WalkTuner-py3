@@ -277,15 +277,20 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         #MyCode Start
+
         self.flag = False
+        self.mainValues =[]
+
         try:
             self.ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
             self.flag = True
         except:
             print("Port not found")
             self.flag = False
+
         self.actionSave.triggered.connect(self.saveFile)
         self.actionOpen.triggered.connect(self.openFile)
+
         self.stopBtn.clicked.connect(self.stopRobot)
         self.startBtn.clicked.connect(self.startRobot)
         #MyCode Finish
@@ -301,6 +306,13 @@ class Ui_MainWindow(object):
         #    print(fileName)
         values = OrderedDict()
 
+        values["V_X"] = str(self.vXSpin.value())
+        values["V_Y"] = str(self.vYSpin.value())
+        values["V_T"] = str(self.vTSpin.value())
+        values["Vx_Offset"] = str(self.vXOffSpin.value())
+        values["Vy_Offset"] = str(self.vYOffSpin.value())
+        values["Vt_Offset"] = str(self.vTOffSpin.value())
+
         values["P_Motion_Resolution"] = str(self.motionResSpin.value())
         values["P_Gait_Frequency"] = str(self.gaitFreqSpin.value())
         values["P_Double_Support_Sleep"] = str(self.doubleSuppSpin.value())
@@ -313,17 +325,13 @@ class Ui_MainWindow(object):
         values["P_COM_Pitch_offset"] = str(self.comPitchSpin.value())
         values["P_COM_Yaw_offset"] = str(self.comYawSpin.value())
 
-        values["P_V_X"] = str(self.vXSpin.value())
-        values["P_V_Y"] = str(self.vYSpin.value())
-        values["P_V_T"] = str(self.vTSpin.value())
-        values["P_V_X_offset"] = str(self.vXOffSpin.value())
-        values["P_V_Y_offset"] = str(self.vYOffSpin.value())
-        values["P_V_T_offset"] = str(self.vTOffSpin.value())
-
         myFile = open(fileName[0] + '.txt', 'w')
         #myFile.write("{" + '\n')
         for value in values:
-            myFile.write("WEP[" + value + "] = " + values[value] + ';' + '\n')
+            if(value == "V_X" or value == "V_Y" or value == "V_T"):
+                myFile.write("//WEP[" + value + "] = " + values[value] + ';' + '\n')
+            else:
+                myFile.write("WEP[" + value + "] = " + values[value] + ';' + '\n')
         #myFile.write('}')
         myFile.close()
         #dlg.setacceptMode(QFileDialog.AcceptSave)
@@ -367,17 +375,52 @@ class Ui_MainWindow(object):
 
     def stopRobot(self):
         if(self.flag):
-            myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0])
+            myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
             self.ser.write(myArr)
         else:
             print("Not Connected to Robot")
 
     def startRobot(self):
         if(self.flag):
-            myArr = bytearray([254, 100, 0, 0, 100, 0, 0, 0, 0])
+            #myArr = bytearray([254, 100, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            myArr = bytearray(self.generateStart())
             self.ser.write(myArr)
         else:
+            #print(self.generateStart())
             print ("Not connected to Robot")
+
+    def generateFormule(self, value):
+            return int((value * 100) + 100)
+
+    def generateStart(self):
+        values = []
+        values.append(254)
+        values.append(self.generateFormule(self.vXSpin.value()))
+        values.append(self.generateFormule(self.vYSpin.value()))
+        values.append(self.generateFormule(self.vTSpin.value()))
+        values.append(100)
+        values.append(self.generateFormule(self.vXOffSpin.value()))
+        values.append(self.generateFormule(self.vYOffSpin.value()))
+        values.append(self.generateFormule(self.vTOffSpin.value()))
+        values.append(self.generateFormule(self.motionResSpin.value()))
+        values.append(self.generateFormule(self.gaitFreqSpin.value()))
+        values.append(self.generateFormule(self.doubleSuppSpin.value()))
+        values.append(self.generateFormule(self.singleSuppSpin.value()))
+        values.append(self.generateFormule(self.comXSpin.value()))
+        values.append(self.generateFormule(self.comYSpin.value()))
+        values.append(self.generateFormule(self.comZSpin.value()))
+        values.append(self.generateFormule(self.comRollSpin.value()))
+        values.append(self.generateFormule(self.comPitchSpin.value()))
+        values.append(self.generateFormule(self.comYawSpin.value()))
+        values.append(0)
+
+        return values
+
+
+
+    def updateValues(self):
+        values = []
+        values.append(254)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
