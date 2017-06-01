@@ -416,8 +416,6 @@ class Ui_MainWindow(object):
 
         return values
 
-
-
     def updateValues(self):
         values = []
         values.append(254)
