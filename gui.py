@@ -53,6 +53,7 @@ class Ui_MainWindow(object):
         self.gaitFreqSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget)
         self.gaitFreqSpin.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
         self.gaitFreqSpin.setMaximum(999.99)
+        self.gaitFreqSpin.setDecimals(3)
         self.gaitFreqSpin.setObjectName("gaitFreqSpin")
         self.horizontalLayout_6.addWidget(self.gaitFreqSpin)
         self.verticalLayout.addLayout(self.horizontalLayout_6)
@@ -148,6 +149,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_14.addWidget(self.comPitchOffset)
         self.comPitchSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_2)
         self.comPitchSpin.setMaximum(999.99)
+        self.comPitchSpin.setMinimum(-1.0)
+        self.comPitchSpin.setDecimals(3)
         self.comPitchSpin.setObjectName("comPitchSpin")
         self.horizontalLayout_14.addWidget(self.comPitchSpin)
         self.verticalLayout_2.addLayout(self.horizontalLayout_14)
@@ -282,7 +285,7 @@ class Ui_MainWindow(object):
         self.mainValues =[]
 
         try:
-            self.ser = serial.Serial('/dev/tty.usbmodem1421', 115200)
+            self.ser = serial.Serial('COM4', 115200)
             self.flag = True
         except:
             print("Port not found")
@@ -339,6 +342,12 @@ class Ui_MainWindow(object):
     def openFile(self):
 
         seq = []
+        seq.append(self.vXSpin)
+        seq.append(self.vYSpin)
+        seq.append(self.vTSpin)
+        seq.append(self.vXOffSpin)
+        seq.append(self.vYOffSpin)
+        seq.append(self.vTOffSpin)
         seq.append(self.motionResSpin)
         seq.append(self.gaitFreqSpin)
         seq.append(self.doubleSuppSpin)
@@ -349,12 +358,6 @@ class Ui_MainWindow(object):
         seq.append(self.comRollSpin)
         seq.append(self.comPitchSpin)
         seq.append(self.comYawSpin)
-        seq.append(self.vXSpin)
-        seq.append(self.vYSpin)
-        seq.append(self.vTSpin)
-        seq.append(self.vXOffSpin)
-        seq.append(self.vYOffSpin)
-        seq.append(self.vTOffSpin)
 
         #dlg = QFileDialog()
         fileName = QFileDialog.getOpenFileName(None, "Open your Record","","Text Files (*.txt)")
@@ -382,7 +385,7 @@ class Ui_MainWindow(object):
 
     def startRobot(self):
         if(self.flag):
-            #myArr = bytearray([254, 100, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            #myArr = bytearray([254, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
             myArr = bytearray(self.generateStart())
             self.ser.write(myArr)
         else:
