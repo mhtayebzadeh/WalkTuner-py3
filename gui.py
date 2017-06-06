@@ -285,7 +285,7 @@ class Ui_MainWindow(object):
         self.mainValues =[]
 
         try:
-            self.ser = serial.Serial('COM5', 115200)
+            self.ser = serial.Serial('COM4', 115200)
             self.flag = True
         except:
             print("Port not found")
@@ -378,7 +378,8 @@ class Ui_MainWindow(object):
 
     def stopRobot(self):
         if(self.flag):
-            myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            #myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            myArr = bytearray(self.generateStop())
             self.ser.write(myArr)
         else:
             print("Not Connected to Robot")
@@ -387,6 +388,7 @@ class Ui_MainWindow(object):
         if(self.flag):
             #myArr = bytearray([254, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
             myArr = bytearray(self.generateStart())
+            #while True:
             self.ser.write(myArr)
         else:
             #print(self.generateStart())
@@ -425,6 +427,34 @@ class Ui_MainWindow(object):
         values.append(self.generateFormule(self.comYawSpin.value()))
         #values.append(0)
         print(values)
+        return values
+
+    def generateStop(self):
+        values = []
+        values.append(254)
+        values.append(0)
+        values.append(0)
+        values.append(0)
+        values.append(112)
+        values.append(0)
+        values.append(0)
+        values.append(0)
+        values.append(self.generateFormule(self.motionResSpin.value()))
+        values.append(self.generateFormule(self.gaitFreqSpin.value()))
+        #values.append(self.generateFormule(self.doubleSuppSpin.value()))
+        values.append(int(self.doubleSuppSpin.value()))
+        #values.append(self.generateFormule(self.singleSuppSpin.value()))
+        values.append(int(self.singleSuppSpin.value()))
+        #values.append(self.generateFormule(self.comXSpin.value()))
+        values.append(int(self.comXSpin.value()))
+        #values.append(self.generateFormule(self.comYSpin.value()))
+        values.append(int(self.comYSpin.value()))
+        #values.append(self.generateFormule(self.comZSpin.value()))
+        values.append(int(self.comZSpin.value()))
+        values.append(self.generateFormule(int(self.comRollSpin.value())))
+        values.append(self.generateFormule(self.comPitchSpin.value()))
+        #values.append(0)
+        values.append(self.generateFormule(self.comYawSpin.value()))
         return values
 
     def updateValues(self):
