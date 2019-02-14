@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'first.ui'
@@ -9,7 +10,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog
 from collections import OrderedDict
-import serial
+import rospy
+from kinematic_pkg.msg import WEP_msg
+
+
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -179,8 +184,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_16.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_16.setObjectName("horizontalLayout_16")
         self.vXLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vXLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vXLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vXLabel.setObjectName("vXLabel")
         self.horizontalLayout_16.addWidget(self.vXLabel)
         self.vXSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -191,8 +195,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_17.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
         self.vYLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vYLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vYLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vYLabel.setObjectName("vYLabel")
         self.horizontalLayout_17.addWidget(self.vYLabel)
         self.vYSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -203,8 +206,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_18.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_18.setObjectName("horizontalLayout_18")
         self.vTLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vTLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vTLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vTLabel.setObjectName("vTLabel")
         self.horizontalLayout_18.addWidget(self.vTLabel)
         self.vTSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -215,8 +217,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_19.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_19.setObjectName("horizontalLayout_19")
         self.vXOffLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vXOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vXOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vXOffLabel.setObjectName("vXOffLabel")
         self.horizontalLayout_19.addWidget(self.vXOffLabel)
         self.vXOffSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -227,8 +228,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_20.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_20.setObjectName("horizontalLayout_20")
         self.vYOffLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vYOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vYOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vYOffLabel.setObjectName("vYOffLabel")
         self.horizontalLayout_20.addWidget(self.vYOffLabel)
         self.vYOffSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -239,8 +239,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_21.setContentsMargins(75, -1, 75, -1)
         self.horizontalLayout_21.setObjectName("horizontalLayout_21")
         self.vTOffLabel = QtWidgets.QLabel(self.verticalLayoutWidget_3)
-        self.vTOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n"
-"")
+        self.vTOffLabel.setStyleSheet("font: 16pt \"TakaoPGothic\";\n""")
         self.vTOffLabel.setObjectName("vTOffLabel")
         self.horizontalLayout_21.addWidget(self.vTOffLabel)
         self.vTOffSpin = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget_3)
@@ -250,13 +249,11 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.VelocityProf, "")
         self.startBtn = QtWidgets.QPushButton(self.centralwidget)
         self.startBtn.setGeometry(QtCore.QRect(190, 550, 131, 41))
-        self.startBtn.setStyleSheet("font: 20pt \"TakaoPGothic\";\n"
-"color : rgb(0, 170, 0);")
+        self.startBtn.setStyleSheet("font: 20pt \"TakaoPGothic\";\n""color : rgb(0, 170, 0);")
         self.startBtn.setObjectName("startBtn")
         self.stopBtn = QtWidgets.QPushButton(self.centralwidget)
         self.stopBtn.setGeometry(QtCore.QRect(430, 550, 131, 41))
-        self.stopBtn.setStyleSheet("font: 20pt \"TakaoPGothic\";\n"
-"color : rgb(202, 0, 0)")
+        self.stopBtn.setStyleSheet("font: 20pt \"TakaoPGothic\";\n""color : rgb(202, 0, 0)")
         self.stopBtn.setObjectName("stopBtn")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -281,11 +278,13 @@ class Ui_MainWindow(object):
 
         #MyCode Start
 
+        self.setDefines() ## set defines aparam
         self.flag = False
         self.mainValues =[]
-
         try:
-            self.ser = serial.Serial('COM4', 115200)
+            self.pub_WEP = rospy.Publisher('update_WEP', WEP_msg, queue_size=10)
+            self.msg = WEP_msg()
+            rospy.init_node('WalkTuner', anonymous=True)
             self.flag = True
         except:
             print("Port not found")
@@ -377,57 +376,69 @@ class Ui_MainWindow(object):
         myFile.close()
 
     def stopRobot(self):
+        #Not used.
         if(self.flag):
-            #myArr = bytearray([254, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            myArr = bytearray(self.generateStop())
-            self.ser.write(myArr)
+            pass
         else:
             print("Not Connected to Robot")
 
     def startRobot(self):
         if(self.flag):
-            #myArr = bytearray([254, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            myArr = bytearray(self.generateStart())
-            #while True:
-            self.ser.write(myArr)
+            self.msg = self.generateStart()
+            self.pub_WEP.publish(self.msg)
         else:
-            #print(self.generateStart())
-            #myArr = bytearray(self.generateStart())
-            #myArr = self.generateStart()
+
             print ("Not connected to Robot")
 
     def generateFormule(self, value):
-            return int((value * 100) + 100)
+            # return int((value * 100) + 100)
+            return value
 
     def generateStart(self):
+        self.msg.WEP = [0 for i in range(self.WEP_NUM)]
+        self.msg.index =  [0 for i in range(self.WEP_NUM)]
         values = []
-        values.append(254)
-        values.append(self.generateFormule(self.vXSpin.value()))
-        values.append(self.generateFormule(self.vYSpin.value()))
-        values.append(self.generateFormule(self.vTSpin.value()))
-        values.append(100)
+        index = []
+
+        index.append(int(self.Vx_Offset))
         values.append(self.generateFormule(self.vXOffSpin.value()))
+        index.append(int(self.Vy_Offset))
         values.append(self.generateFormule(self.vYOffSpin.value()))
+        index.append(int(self.Vt_Offset))        
         values.append(self.generateFormule(self.vTOffSpin.value()))
+        index.append(int(self.P_Motion_Resolution))        
         values.append(self.generateFormule(self.motionResSpin.value()))
+        index.append(int(self.P_Gait_Frequency))
         values.append(self.generateFormule(self.gaitFreqSpin.value()))
+
         #values.append(self.generateFormule(self.doubleSuppSpin.value()))
+        index.append(int(self.P_Double_Support_Sleep))        
         values.append(int(self.doubleSuppSpin.value()))
+        index.append(int(self.P_Single_Support_Sleep))                
         #values.append(self.generateFormule(self.singleSuppSpin.value()))
         values.append(int(self.singleSuppSpin.value()))
         #values.append(self.generateFormule(self.comXSpin.value()))
+        index.append(int(self.P_COM_X_offset))
         values.append(int(self.comXSpin.value()))
+        index.append(int(self.P_COM_Y_offset)) 
         #values.append(self.generateFormule(self.comYSpin.value()))
         values.append(int(self.comYSpin.value()))
+        index.append(int(self.P_COM_Z_offset))
         #values.append(self.generateFormule(self.comZSpin.value()))
         values.append(int(self.comZSpin.value()))
+        index.append(int(self.P_COM_Roll_offset))
         values.append(self.generateFormule(int(self.comRollSpin.value())))
+        index.append(int(self.P_COM_Pitch_offset))
         values.append(self.generateFormule(self.comPitchSpin.value()))
-        #values.append(0)
+        index.append(int(self.P_COM_Yaw_offset))        
         values.append(self.generateFormule(self.comYawSpin.value()))
-        #values.append(0)
+
+        sizeOfArr = len(values)
+        self.msg.sizeOfArr = sizeOfArr
+        self.msg.WEP[0 : sizeOfArr] = values
+        self.msg.index[0 : sizeOfArr] = index
         print(values)
-        return values
+        return self.msg
 
     def generateStop(self):
         values = []
@@ -489,6 +500,140 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
 
+    def setDefines(self):
+        ##Walk Engine Parameters
+        self.P_Motion_Resolution =  1  ##motion resoulotion (min=0.001  max=0.1)  
+        self.P_Gait_Frequency =  2  ##gait frequency (min=0.001  max=1.0) 
+        self.P_Double_Support_Sleep =  3  ##double support sleep (min=0.001  max=1.0)  
+        self.P_Single_Support_Sleep =  4  ##single support sleep (min=0.001  max=1.0)  
+        self.P_Fly_Roll_Gain =   5  ##fly leg roll gain  
+        self.P_Fly_Pitch_Gain =  6  ##fly leg pitch gain 
+        self.P_Fly_Yaw_Gain = 7  ##fly leg yaw gain
+        self.P_Fly_X_Swing_Gain =   8
+        self.P_Fly_Y_Swing_Gain =   9
+        self.P_Fly_Z_Swing_Gain =   10  ##fly leg step height gain (min=0.001  max=1.0)  
+        self.P_Support_Roll_Gain =  11  ##support leg roll gain  
+        self.P_Support_Pitch_Gain = 12  ##support leg pitch gain
+        self.P_Support_Yaw_Gain =   13  ##support leg yaw gain  
+        self.P_Support_X_Swing_Gain =  14  
+        self.P_Support_Y_Swing_Gain =  15  ##support leg Y gain (sideward) 
+        self.P_Support_Z_Swing_Gain =  16  ##support leg Z gain (topdown) this parameter also can use for push  
+        self.P_Body_X_Swing_Gain =  17
+        self.P_Body_Y_Swing_Gain =  18  ##body sideward swing gain (for swing both of legs in y axis during walk)  
+        self.P_Body_Z_Swing_Gain =  19  ##body topdown swing gain (for swing both of legs in Z axis during walk)
+
+        ##stablization parameters
+        self.P_Stablizer_Arm_Pitch_Gain = 20 ##add
+        self.P_Stablizer_Arm_Roll_Gain =  21 ##add
+        self.P_Stablizer_Arm_Elbow_Gain = 22
+        self.P_Stablizer_Hip_Roll_Gain =  23 ##add
+        self.P_Stablizer_Hip_Pitch_Gain = 24 ##add
+        self.P_Stablizer_Knee_Gain =   25 ##add
+        self.P_Stablizer_Foot_Pitch_Gain =   26 ##add
+        self.P_Stablizer_Foot_Roll_Gain = 27 ##add
+        self.P_Stablizer_COM_X_Shift_Gain =  28 ##add
+        self.P_Stablizer_COM_Y_Shift_Gain =  29 ##add
+
+        self.P_Gyro_Stablizer_Arm_Pitch_Gain =  30 ##add
+        self.P_Gyro_Stablizer_Arm_Roll_Gain =   31
+        self.P_Gyro_Stablizer_Arm_Elbow_Gain =  32
+        self.P_Gyro_Stablizer_Hip_Roll_Gain =   33 ##add
+        self.P_Gyro_Stablizer_Hip_Pitch_Gain =  34 ##add
+        self.P_Gyro_Stablizer_Knee_Gain = 35 ##add
+        self.P_Gyro_Stablizer_Foot_Pitch_Gain = 36 ##add
+        self.P_Gyro_Stablizer_Foot_Roll_Gain =  37 ##add
+        self.P_Gyro_Stablizer_COM_X_Shift_Gain=  38 ##add
+        self.P_Gyro_Stablizer_COM_Y_Shift_Gain=  39 ##add
+
+        ##hopping gait gain
+        self.P_Stablizer_Hopping_Gait_X_Gain =  40
+        self.P_Stablizer_Hopping_Gait_Y_Gain =  41
+
+        ##both leg offset in inverse kinematic (body COM)
+        self.P_COM_X_offset = 42 ##add
+        self.P_COM_Y_offset = 43 ##add
+        self.P_COM_Z_offset = 44 ##add
+        self.P_COM_Roll_offset = 45 ##add
+        self.P_COM_Pitch_offset =   46 ##add
+        self.P_COM_Yaw_offset =  47 ##add
+        
+        ##legs joints offset 
+        self.P_Left_Leg_Hip_Yaw_Offset =  48 ##add
+        self.P_Left_Leg_Hip_Roll_Offset = 49 ##add
+        self.P_Left_Leg_Hip_Pitch_Offset =   50 ##add
+        self.P_Left_Leg_Knee_Offset =  51 ##add
+        self.P_Left_Leg_Foot_Pitch_Offset =  52 ##add
+        self.P_Left_Leg_Foot_Roll_Offset =   53 ##add
+
+        self.P_Right_Leg_Hip_Yaw_Offset = 54 ##add
+        self.P_Right_Leg_Hip_Roll_Offset =   55 ##add
+        self.P_Right_Leg_Hip_Pitch_Offset =  56 ##add
+        self.P_Right_Leg_Knee_Offset = 57 ##add
+        self.P_Right_Leg_Foot_Pitch_Offset = 58 ##add
+        self.P_Right_Leg_Foot_Roll_Offset =  59 ##add
+
+        ##Left leg inverse kinematic offset 
+        self.P_Left_Leg_X_Offset =  60 ##add
+        self.P_Left_Leg_Y_Offset =  61 ##add
+        self.P_Left_Leg_Z_Offset =  62 ##add
+        self.P_Left_Leg_Roll_Offset =  63 ##add
+        self.P_Left_Leg_Pitch_Offset = 64 ##add
+        self.P_Left_Leg_Yaw_Offset =   65 ##add
+
+        self.P_Right_Leg_X_Offset = 66 ##add
+        self.P_Right_Leg_Y_Offset = 67 ##add
+        self.P_Right_Leg_Z_Offset = 68 ##add
+        self.P_Right_Leg_Roll_Offset = 69 ##add
+        self.P_Right_Leg_Pitch_Offset =   70 ##add
+        self.P_Right_Leg_Yaw_Offset =  71 ##add
+
+        self.P_R_Arm_Pitch_offset = 72 ##add
+        self.P_R_Arm_Roll_offset =  73 ##add
+        self.P_R_Arm_Elbow_offset = 74 ##add
+
+        self.P_L_Arm_Pitch_offset = 75 ##add
+        self.P_L_Arm_Roll_offset =  76 ##add
+        self.P_L_Arm_Elbow_offset = 77 ##add
+
+        ##fall thershold
+        self.P_Fall_Roll_Thershold =   78
+        self.P_Fall_Pitch_Thershold =  79
+
+        ##imu offset
+        self.P_IMU_X_Angle_Offset = 80 ##add
+        self.P_IMU_Y_Angle_Offset = 81 ##add
+
+        ##MPU filtering parametrs 
+        self.P_Gyro_X_LowPass_Gain =   82 ##add
+        self.P_Gyro_Y_LowPass_Gain =   83 ##add
+
+        ##kalman filter r mesurement value
+        self.P_Kalman_Roll_RM_Rate =   84
+        self.P_Kalman_Pitch_RM_Rate =  85
+        self.P_Kalman_Yaw_RM_Rate = 86
+
+        ##smoothing ratio
+        self.P_Vx_Smoothing_Ratio = 87 
+        self.P_Vy_Smoothing_Ratio = 88 
+        self.P_Vt_Smoothing_Ratio = 89 
+
+        self.P_Leg_Length =   90 ##add
+
+        self.P_Head_Pan_Speed =  91
+        self.P_Head_Tilt_Speed = 92
+
+        self.P_Min_Voltage_Limit =  93
+
+        self.Vx_Offset =   94
+        self.Vy_Offset =   95
+        self.Vt_Offset =   96
+
+        self.P_Left_Leg_Hip_Pitch_Offset_Original = 97 ##add
+        self.P_Right_Leg_Hip_Pitch_Offset_Original=  98 ##add
+        self.P_Left_Leg_Hip_Pitch_Offset_Backwards=  99 ##add
+        self.P_Right_Leg_Hip_Pitch_Offset_Backwards= 100 ##add
+
+        self.WEP_NUM = 101
 
 if __name__ == "__main__":
     import sys
